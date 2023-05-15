@@ -1,130 +1,101 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title> Black Jack Game /title>
-        import random
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackjack</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Blackjack!</h1>
+    <div id="player-hand">
+      <h2>Player's Hand:</h2>
+    </div>
+    <div id="dealer-hand">
+      <h2>Dealer's Hand:</h2>
+    </div>
+    <div id="game-buttons">
+      <button id="hit-btn" class="btn btn-primary">Hit</button>
+      <button id="stand-btn" class="btn btn-primary">Stand</button>
+    </div>
+    <div id="result"></div>
+  </div>
+  
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var hitBtn = document.getElementById('hit-btn');
+      var standBtn = document.getElementById('stand-btn');
+      var playerHand = document.getElementById('player-hand');
+      var dealerHand = document.getElementById('dealer-hand');
+      var result = document.getElementById('result');
 
-        class Card
-            def __init__(self, suit, rank):
-                self.suit = suit
-                self.rank = rank
-        
-        class Deck
-            def __init__(self):
-                self.cards = []
-                self.create_deck()
-        
-            def create_deck(self):
-                suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
-                ranks = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
-                for suit in suits:
-                    for rank in ranks:
-                        self.cards.append(Card(suit, rank))
-        
-            def shuffle(self):
-                random.shuffle(self.cards)
-        
-            def draw_card(self):
-                return self.cards.pop()
-        
-        class Hand:
-            def __init__(self):
-                self.cards = []
-        
-            def add_card(self, card):
-                self.cards.append(card)
-        
-            def get_value(self):
-                value = 0
-                ace_count = 0
-                for card in self.cards:
-                    if card.rank in ['Jack', 'Queen', 'King']:
-                        value += 10
-                    elif card.rank == 'Ace':
-                        value += 11
-                        ace_count += 1
-                    else:
-                        value += int(card.rank)
-        
-                while value > 21 and ace_count > 0:
-                    value -= 10
-                    ace_count -= 1
-        
-                return value
-        
-        class Player:
-            def __init__(self, name):
-                self.name = name
-                self.hand = Hand()
-        
-            def hit(self, deck):
-                card = deck.draw_card()
-                self.hand.add_card(card)
-        
-            def show_hand(self):
-                print(f"{self.name}'s hand:")
-                for card in self.hand.cards:
-                    print(f"{card.rank} of {card.suit}")
-        
-        class BlackjackGame:
-            def __init__(self):
-                self.deck = Deck()
-                self.deck.shuffle()
-                self.player = Player("Player")
-                self.dealer = Player("Dealer")
-                self.player.hit(self.deck)
-                self.player.hit(self.deck)
-                self.dealer.hit(self.deck)
-                self.dealer.hit(self.deck)
-        
-            def play(self):
-                print("Welcome to Blackjack!")
-                self.player.show_hand()
-                print("Dealer's hand:")
-                print(f"{self.dealer.hand.cards[0].rank} of {self.dealer.hand.cards[0].suit}")
-                self.player_turn()
-                self.dealer_turn()
-                self.determine_winner()
-        
-            def player_turn(self):
-                while True:
-                    choice = input("Do you want to hit or stand? (h/s): ")
-                    if choice.lower() == 'h':
-                        self.player.hit(self.deck)
-                        self.player.show_hand()
-                        if self.player.hand.get_value() > 21:
-                            print("Player busts! You lose.")
-                            break
-                    elif choice.lower() == 's':
-                        break
-        
-            def dealer_turn(self):
-                print("Dealer's turn:")
-                print("Dealer's hand:")
-                self.dealer.show_hand()
-                while self.dealer.hand.get_value() < 17:
-                    self.dealer.hit(self.deck)
-                    print("Dealer hits.")
-                    print("Dealer's hand:")
-                    self.dealer.show_hand()
-                    if self.dealer.hand.get_value() > 21:
-                        print("Dealer busts! You win.")
-                        break
-                else:
-                    print("Dealer stands.")
-        
-            def determine_winner(self):
-                player_value = self.player.hand.get_value()
-                dealer_value = self.dealer.hand.get_value()
-                if player_value > dealer_value:
-                    print("You win!")
+      var game = new BlackjackGame();
 
-        
-  </head>
-  <body>
-    <h1></h1>
- 
- </body>
-</html>
+      function updatePlayerHand() {
+        playerHand.innerHTML = "<h2>Player's Hand:</h2>";
+        game.player.hand.cards.forEach(function (card) {
+          var cardText = document.createElement('p');
+          cardText.innerText = card.rank + ' of ' + card.suit;
+          playerHand.appendChild(cardText);
+        });
+      }
+
+      function updateDealerHand(showFirstCardOnly) {
+        dealerHand.innerHTML = "<h2>Dealer's Hand:</h2>";
+        var cards = game.dealer.hand.cards;
+        for (var i = 0; i < cards.length; i++) {
+          var cardText = document.createElement('p');
+          if (i === 0 && showFirstCardOnly) {
+            cardText.innerText = cards[i].rank + ' of ' + cards[i].suit;
+          } else {
+            cardText.innerText = 'Hidden';
+          }
+          dealerHand.appendChild(cardText);
+        }
+      }
+
+      function updateResult(message) {
+        result.innerText = message;
+      }
+
+      function disableButtons() {
+        hitBtn.disabled = true;
+        standBtn.disabled = true;
+      }
+
+      function enableButtons() {
+        hitBtn.disabled = false;
+        standBtn.disabled = false;
+      }
+
+      function handleHit() {
+        game.player.hit(game.deck);
+        updatePlayerHand();
+        if (game.player.hand.get_value() > 21) {
+          updateResult('Player busts! You lose.');
+          disableButtons();
+        }
+      }
+
+      function handleStand() {
+        disableButtons();
+        updateDealerHand(false);
+
+        while (game.dealer.hand.get_value() < 17) {
+          game.dealer.hit(game.deck);
+          updateDealerHand(false);
+          if (game.dealer.hand.get_value() > 21) {
+            updateResult('Dealer busts! You win.');
+            break;
+          }
+        }
+
+        var playerValue = game.player.hand.get_value();
+        var dealerValue = game.dealer.hand.get_value();
+
+        if (playerValue > dealerValue) {
+          updateResult('Player wins!');
+        } else if (playerValue < dealerValue) {
+          updateResult('

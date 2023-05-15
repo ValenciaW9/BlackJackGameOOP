@@ -1,1 +1,63 @@
-https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js
+document.addEventListener('DOMContentLoaded', function () {
+  var hitBtn = document.getElementById('hit-btn');
+  var standBtn = document.getElementById('stand-btn');
+  var playerHand = document.getElementById('player-hand');
+  var dealerHand = document.getElementById('dealer-hand');
+  var result = document.getElementById('result');
+
+  var game = new BlackjackGame();
+
+  function updatePlayerHand() {
+    playerHand.innerHTML = "<h2>Player's Hand:</h2>";
+    game.player.hand.cards.forEach(function (card) {
+      var cardText = document.createElement('p');
+      cardText.innerText = card.rank + ' of ' + card.suit;
+      playerHand.appendChild(cardText);
+    });
+  }
+
+  function updateDealerHand(showFirstCardOnly) {
+    dealerHand.innerHTML = "<h2>Dealer's Hand:</h2>";
+    var cards = game.dealer.hand.cards;
+    for (var i = 0; i < cards.length; i++) {
+      var cardText = document.createElement('p');
+      if (i === 0 && showFirstCardOnly) {
+        cardText.innerText = cards[i].rank + ' of ' + cards[i].suit;
+      } else {
+        cardText.innerText = 'Hidden';
+      }
+      dealerHand.appendChild(cardText);
+    }
+  }
+
+  function updateResult(message) {
+    result.innerText = message;
+  }
+
+  function disableButtons() {
+    hitBtn.disabled = true;
+    standBtn.disabled = true;
+  }
+
+  function enableButtons() {
+    hitBtn.disabled = false;
+    standBtn.disabled = false;
+  }
+
+  function handleHit() {
+    game.player.hit(game.deck);
+    updatePlayerHand();
+    if (game.player.hand.get_value() > 21) {
+      updateResult('Player busts! You lose.');
+      disableButtons();
+    }
+  }
+
+  function handleStand() {
+    disableButtons();
+    updateDealerHand(false);
+
+    while (game.dealer.hand.get_value() < 17) {
+      game.dealer.hit(game.deck);
+      updateDealerHand(false);
+      if (game.dealer.hand.get_value() > 
